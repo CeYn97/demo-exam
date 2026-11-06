@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Course {
+  ALGORITHMS
+  WEB_DESIGN
+  DATABASES
+}
+
+enum PaymentMethod {
+  CASH
+  PHONE_TRANSFER
+}
+
+enum ApplicationStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  login        String        @unique
+  passwordHash String
+  fullName     String
+  phone        String
+  email        String
+  role         Role          @default(USER)
+  applications Application[]
+}
+
+model Application {
+  id            Int               @id @default(autoincrement())
+  userId        Int
+  user          User              @relation(fields: [userId], references: [id])
+  course        Course
+  startDate     DateTime          @db.Date
+  paymentMethod PaymentMethod
+  status        ApplicationStatus @default(NEW)
+  createdAt     DateTime          @default(now())
+  review        Review?
+
+  @@index([userId])
+}
+
+model Review {
+  id            Int         @id @default(autoincrement())
+  applicationId Int         @unique
+  application   Application @relation(fields: [applicationId], references: [id])
+  text          String
+}
